@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111a24">
+    <title>Schach</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Schach Startseite">
+          <span class="brand-mark" aria-hidden="true">♞</span>
+          <span>Schach<span class="brand-dot">.</span></span>
+        </a>
+        <button class="home-link" id="home-button" type="button" hidden>← Startseite</button>
+      </header>
+
+      <section class="home-screen" id="home-screen">
+        <span class="eyebrow">DEIN SCHACHABEND</span>
+        <h1>Wähle deine Partie</h1>
+        <p>Spiel eine Runde gegen den Computer oder lade einen Freund ein.</p>
+        <div class="home-actions">
+          <button class="mode-card" id="bot-mode-button" type="button">
+            <span class="mode-icon" aria-hidden="true">♟</span>
+            <strong>Gegen Bot spielen</strong>
+            <small>Starte direkt eine Partie gegen den Computer.</small>
+            <span class="mode-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="mode-card" id="friend-mode-button" type="button">
+            <span class="mode-icon friend-icon" aria-hidden="true">♙</span>
+            <strong>Gegen Freund spielen</strong>
+            <small>Stelle die Partie ein und teile deinen Einladungslink.</small>
+            <span class="mode-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="friend-setup" id="friend-setup-screen" hidden>
+        <button class="back-link" id="setup-back-button" type="button">← Zurück</button>
+        <span class="eyebrow">FREUNDSCHAFTSSPIEL</span>
+        <h1>Partie einstellen</h1>
+        <p class="setup-intro">Lege die Bedenkzeit und deine Farbe fest. Danach kannst du den Einladungslink verschicken.</p>
+        <form id="friend-setup-form" class="setup-card">
+          <label class="field-label" for="time-minutes">Bedenkzeit pro Spieler</label>
+          <div class="time-input-row">
+            <input id="time-minutes" type="number" min="1" max="1440" step="1" value="10" inputmode="numeric">
+            <span>Minuten</span>
+          </div>
+          <label class="check-row" for="unlimited-time">
+            <input id="unlimited-time" type="checkbox">
+            <span>Unbegrenzt spielen</span>
+          </label>
+          <label class="field-label color-label" for="creator-color">Meine Farbe</label>
+          <select id="creator-color">
+            <option value="random">Zufällige Farbe</option>
+            <option value="w">Weiß – ich fange an</option>
+            <option value="b">Schwarz – Freund fängt an</option>
+          </select>
+          <button class="button button-primary setup-submit" type="submit">Einladung erstellen</button>
+        </form>
+        <div class="join-existing">
+          <span>Hast du schon einen Code?</span>
+          <form class="join-room" id="join-room-form">
+            <label class="sr-only" for="room-code-input">Einladungscode</label>
+            <input id="room-code-input" maxlength="6" autocomplete="off" placeholder="Code eingeben" aria-label="Einladungscode">
+            <button class="button button-secondary" type="submit">Beitreten</button>
+          </form>
+        </div>
+        <p class="online-error setup-error" id="setup-error" aria-live="polite"></p>
+      </section>
+
+      <section class="layout" id="game-screen" aria-label="Schachpartie" hidden>
+        <div class="game">
+          <div class="player player-top" id="black-player">
+            <span class="player-avatar black-avatar" aria-hidden="true">♚</span>
+            <span class="player-info"><strong>Schwarz</strong><small>Spielt am oberen Rand</small></span>
+            <span class="clock" id="black-clock">∞</span>
+            <span class="turn-indicator" aria-hidden="true"></span>
+          </div>
+
+          <div class="board-wrap">
+            <div class="coordinates ranks" aria-hidden="true">
+              <span>8</span><span>7</span><span>6</span><span>5</span>
+              <span>4</span><span>3</span><span>2</span><span>1</span>
+            </div>
+            <div class="board" id="board" role="grid" aria-label="Schachbrett"></div>
+            <div class="coordinates files" aria-hidden="true">
+              <span>a</span><span>b</span><span>c</span><span>d</span>
+              <span>e</span><span>f</span><span>g</span><span>h</span>
+            </div>
+          </div>
+
+          <div class="player player-bottom" id="white-player">
+            <span class="player-avatar white-avatar" aria-hidden="true">♔</span>
+            <span class="player-info"><strong>Weiß</strong><small>Spielt am unteren Rand</small></span>
+            <span class="clock" id="white-clock">∞</span>
+            <span class="turn-indicator" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <aside class="sidebar">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">PARTIE</span>
+              <h1>Schach</h1>
+            </div>
+            <span class="live-badge"><span></span> LIVE</span>
+          </div>
+
+          <section class="online-panel" id="online-panel" aria-label="Online-Partie" hidden>
+            <div class="online-heading"><h2>Einladung</h2><span>ONLINE</span></div>
+            <div class="room-info" id="room-info" hidden>
+              <div class="room-code-line"><span>Einladungscode</span><strong id="room-code-output"></strong></div>
+              <button class="button button-secondary copy-room" id="copy-room-button" type="button">Einladungslink kopieren</button>
+              <p id="online-status" aria-live="polite"></p>
+            </div>
+            <p class="online-error" id="online-error" aria-live="polite"></p>
+          </section>
+
+          <label class="check-row auto-finish-setting" for="auto-finish-toggle">
+            <input id="auto-finish-toggle" type="checkbox" checked>
+            <span>Zug automatisch abschließen</span>
+          </label>
+
+          <div class="status-card" aria-live="polite">
+            <span class="status-icon" id="status-icon" aria-hidden="true">♙</span>
+            <div><small>AM ZUG</small><strong id="status-text">Weiß ist am Zug</strong></div>
+          </div>
+
+          <div class="moves-section">
+            <div class="section-title"><h2>Partieverlauf</h2><span id="move-count">0 Züge</span></div>
+            <div class="moves-list" id="moves-list" aria-live="polite">
+              <p class="empty-moves">Die Partie beginnt mit deinem ersten Zug.</p>
+            </div>
+          </div>
+
+          <div class="controls">
+            <button class="button button-secondary" id="undo-button" type="button" disabled>
+              <span aria-hidden="true">↶</span> Zug zurück
+            </button>
+            <button class="button button-primary submit-move-button" id="submit-move-button" type="button" hidden>
+              Zug absenden
+            </button>
+            <button class="button button-primary" id="new-game-button" type="button">
+              <span aria-hidden="true">＋</span> Neue Partie
+            </button>
+          </div>
+          <div class="takeback-controls" id="takeback-controls" hidden>
+            <p id="takeback-message" aria-live="polite"></p>
+            <button class="button button-primary" id="accept-takeback-button" type="button" hidden>Rücknahme annehmen</button>
+            <button class="button button-secondary" id="decline-takeback-button" type="button" hidden>Ablehnen</button>
+            <button class="button button-secondary" id="cancel-takeback-button" type="button" hidden>Anfrage zurückziehen</button>
+          </div>
+          <p class="hint"><span aria-hidden="true">●</span> Tippe auf eine Figur, dann auf ihr Zielfeld.</p>
+        </aside>
+      </section>
+
+      <footer>Schach spielen · allein oder mit Freunden</footer>
+    </main>
+
+    <div class="promotion-overlay" id="promotion-overlay" hidden>
+      <div class="promotion-dialog" role="dialog" aria-modal="true" aria-labelledby="promotion-title">
+        <span class="eyebrow">BAUERNUMWANDLUNG</span>
+        <h2 id="promotion-title">Wähle eine Figur</h2>
+        <div class="promotion-choices" id="promotion-choices"></div>
+      </div>
+
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

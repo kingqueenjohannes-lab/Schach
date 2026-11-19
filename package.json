@@ -1,0 +1,13 @@
+{
+  "name": "schach-online",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html script.js style.css dist/"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.9",
+    "chess.js": "^1.4.0"
+  }
+}
