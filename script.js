@@ -63,6 +63,7 @@ let undoStack = [];
 let pendingPromotion = null;
 let pendingMove = null;
 let gameMode = null;
+let viewColor = "w";
 let botThinking = false;
 let botTimer = null;
 let onlineRoom = null;
@@ -299,8 +300,10 @@ function render() {
   const displayState = pendingMove ? applyMove(state, pendingMove) : state;
   const checkedKing = inCheck(state, state.turn) ? findKing(state.board, state.turn) : null;
 
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
+  const rows = viewColor === "b" ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
+  const columns = viewColor === "b" ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
+  for (const r of rows) {
+    for (const c of columns) {
       const square = document.createElement("button");
       square.type = "button";
       square.className = `square ${(r + c) % 2 === 0 ? "light" : "dark"}`;
@@ -329,6 +332,28 @@ function render() {
       boardElement.append(square);
     }
   }
+
+  const whitePlayer = document.querySelector("#white-player");
+  const blackPlayer = document.querySelector("#black-player");
+  whitePlayer.classList.toggle("player-top", viewColor === "b");
+  whitePlayer.classList.toggle("player-bottom", viewColor === "w");
+  blackPlayer.classList.toggle("player-top", viewColor === "w");
+  blackPlayer.classList.toggle("player-bottom", viewColor === "b");
+
+  const rankLabels = document.querySelector(".coordinates.ranks");
+  const fileLabels = document.querySelector(".coordinates.files");
+  rankLabels.replaceChildren(...(viewColor === "b" ? ["1", "2", "3", "4", "5", "6", "7", "8"] : ["8", "7", "6", "5", "4", "3", "2", "1"])
+    .map(label => {
+      const span = document.createElement("span");
+      span.textContent = label;
+      return span;
+    }));
+  fileLabels.replaceChildren(...(viewColor === "b" ? ["h", "g", "f", "e", "d", "c", "b", "a"] : ["a", "b", "c", "d", "e", "f", "g", "h"])
+    .map(label => {
+      const span = document.createElement("span");
+      span.textContent = label;
+      return span;
+    }));
 
   const moves = allLegalMoves(state);
   const checked = inCheck(state, state.turn);
@@ -674,6 +699,7 @@ function startBotGame() {
   clockTimer = null;
   botThinking = false;
   gameMode = "bot";
+  viewColor = "w";
   state = initialState();
   undoStack = [];
   selected = null;
@@ -710,6 +736,7 @@ async function connectToRoom(code, action = "join", settings = {}) {
     });
     onlineRoom = { code: game.code, token: game.token, color: game.playerColor };
     gameMode = "online";
+    viewColor = game.playerColor;
     movePending = false;
     roomVersion = 0;
     window.localStorage.setItem(`schach-room-${game.code}`, game.token);
@@ -813,6 +840,7 @@ function leaveOnlineGame() {
   clockTimer = null;
   onlineRoom = null;
   gameMode = null;
+  viewColor = "w";
   roomVersion = 0;
   opponentJoined = false;
   movePending = false;
