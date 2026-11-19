@@ -2,7 +2,10 @@ import { getStore } from "@netlify/blobs";
 import { Chess } from "chess.js";
 import { randomBytes, randomInt, randomUUID } from "node:crypto";
 
-const games = getStore("chess-games");
+// The Blobs store is opened per request: Netlify issues a fresh access token
+// for every invocation, so a store created at module load would keep using an
+// expired token once the function instance is reused.
+let games;
 const codeCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function response(data, status = 200) {
@@ -105,6 +108,16 @@ function publicGame(game, color) {
 }
 
 export default async request => {
+  games = getStore("chess-games");
+  try {
+    return await handleRequest(request);
+  } catch (error) {
+    console.error(error);
+    return response({ error: "Auf dem Server ist ein Fehler aufgetreten. Bitte versuche es gleich noch einmal." }, 500);
+  }
+};
+
+async function handleRequest(request) {
   if (request.method !== "POST") return response({ error: "Nur POST-Anfragen sind erlaubt." }, 405);
 
   let input;
@@ -269,4 +282,4 @@ export default async request => {
   }
 
   return response({ error: "Unbekannte Aktion." }, 400);
-};
+}
