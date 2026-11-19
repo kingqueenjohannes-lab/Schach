@@ -103,6 +103,7 @@ button { font: inherit; }
 .board {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, minmax(0, 1fr));
   overflow: hidden;
   aspect-ratio: 1;
   border: 5px solid #293843;
